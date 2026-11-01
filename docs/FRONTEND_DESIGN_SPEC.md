@@ -4,43 +4,82 @@
 
 This document records the required V2 frontend direction. It does not authorize frontend implementation.
 
-At the time of writing, the reference sketches and AI-generated visualization described by the project owner are not accessible as local files in this workspace or as attached images in this conversation. They have therefore not been inspected. Before implementation begins, the supplied references must be made available as accessible local files and recorded in the implementation task.
+The four supplied reference images are visual inspiration only. They must inform useful screen structure, navigation, and workflow hierarchy, but must not be reproduced pixel-for-pixel or used to justify exaggerated neon styling, crowded layouts, fabricated values, or decorative elements that reduce usability.
 
 ## Reference inspection record
 
-The requested reference location is docs/design-references/. It was checked during the Phase 1 design-spec review and is not present in the repository workspace. A narrow workspace scan also found no image files. Consequently, zero of the expected four images have been inspected:
+The requested docs/design-references/ directory is not present. The four supplied images were instead found as untracked, local files at the repository root and inspected there. They were not moved, edited, staged, or committed.
 
-| Expected reference | Inspection status |
+| Reference image inspected | Interpreted role | Retained inspiration |
 | --- | --- |
-| Original sketch 1 | Not available locally; not inspected |
-| Original sketch 2 | Not available locally; not inspected |
-| Original sketch 3 | Not available locally; not inspected |
-| Advanced AI-generated visualization | Not available locally; not inspected |
+| Neon Doctor Portal Login Dashboard.png | Doctor login | Clear two-column entry flow, hospital context, concise role-specific actions |
+| Neon Federated Brain Model Dashboard.png | Global Model Dashboard | Persistent navigation, top-level system status, model/round/metric information hierarchy |
+| ZKP-CerebraChain MRI Analysis Dashboard.png | Doctor Dashboard and MRI workflow | MRI-analysis workspace, modality selection, orientation controls, result/provenance grouping |
+| ZKP-CerebraChain Neon Login Dashboard.png | Hospital login and registration | Hospital/doctor entry choice and an obvious registration path |
 
-To clear this gate, add the four original source images as accessible local files beneath docs/design-references/ and identify their intended role if filenames are ambiguous. Their screen, navigation, layout, and visual decisions must then be reviewed and recorded before implementation starts.
+The reference images visibly use very dark backgrounds, bright purple/cyan glow, strong gradients, glowing borders, decorative waves, and example success metrics. Those choices are explicitly superseded by the revised visual requirements below. Their displayed MRI results, metrics, verification states, transaction records, user details, and hospital counts are illustrative only and must not be copied as V2 data.
 
-When available, visual direction is resolved in this order:
+Visual decisions are resolved in this order:
 
-1. Google Stitch design files are the primary visual reference.
-2. The three original frontend reference sketches and the AI-generated visualization refine missing or ambiguous details.
-3. This specification defines non-visual product, accessibility, responsiveness, integrity, and modularity constraints.
+1. Functional, security, privacy, data-integrity, accessibility, and responsiveness requirements in this specification.
+2. The revised visual system and design guardrails in this specification.
+3. Google Stitch exports, reviewed and refined against these requirements.
+4. The four inspected reference images, as general layout and workflow inspiration only.
 
-Stitch output must be refactored into maintainable React components, tokens, routes, and feature modules. It must not be pasted into a single generated page component.
+Stitch output must be refactored into maintainable React components, tokens, routes, and feature modules. It must not be pasted into a single generated page component or accepted without reviewing its colors, contrast, gradients, shadows, density, and accessibility.
 
 ## Visual language
 
-The application must present as a professional medical-technology interface, not a generic administration dashboard.
+The application must present as a professional, modern, readable Medical AI SaaS dashboard, not a generic administration dashboard or a high-intensity cyberpunk interface. Readability, workflow clarity, and visual comfort take priority over decorative effects.
 
-- Use a dark navy visual foundation.
-- Use purple and cyan neon accents deliberately for interactive, status, and data-visualization elements.
-- Use glassmorphism surfaces with controlled translucency, readable contrast, subtle borders, and layered depth.
-- Use clean, legible typography with an explicit type scale.
-- Use smooth, restrained Framer Motion transitions that support orientation and state changes without obscuring clinical/research information.
-- Make an interactive 3D brain visualization a first-class experience where it is appropriate, not a decorative placeholder.
-- Keep charts, imaging views, proof states, and chain records visually distinguishable while sharing the same design system.
-- Support responsive layouts from smaller laptop/tablet widths through wide clinical-dashboard displays.
+### Required color system
 
-The final implementation must derive reusable design tokens for color, spacing, radii, blur, shadows, typography, chart colors, focus states, and animation timing from the approved Stitch/reference material.
+| Token | Value | Intended use |
+| --- | --- | --- |
+| Background | #111827 | Main dark-navy canvas; never replace with pure black |
+| Sidebar | #172033 | Persistent navigation and secondary shell surface |
+| Card | #1E293B | Opaque or near-opaque content cards and form surfaces |
+| Primary | #8B5CF6 | Primary actions, selected tabs, active navigation, and selection state |
+| Secondary | #22D3EE | Limited supporting emphasis, data visualization, focus accents, and technical metadata |
+| Text primary | #F1F5F9 | Primary headings, values, and body copy |
+| Text secondary | #CBD5E1 | Supporting copy, labels, helper text, and subdued metadata |
+| Border | #334155 | Low-emphasis card, input, and section separation |
+| Success | #10B981 | Positive state only when supplied by real backend evidence |
+
+Purple and cyan are accents, not background treatments. Purple is reserved primarily for active navigation, primary buttons, selected controls, and a small number of priority indicators. Cyan provides secondary emphasis and must not compete with primary actions. Success green must never imply a completed analysis, proof, or transaction without an actual verified result.
+
+### Surface, typography, and motion rules
+
+- Use dark navy rather than pure black, with calm tonal separation between the page, sidebar, and cards.
+- Use clean cards with comfortable padding, consistent dimensions within a section, subtle shadows, and #334155 borders.
+- Glassmorphism is permitted only as a restrained surface treatment: preserve opaque-enough panels and text contrast; do not place critical text over busy imagery.
+- Do not apply glowing borders to every card or input. Glow is limited to transient focus feedback or a single selected/primary control, and must be subtle.
+- Avoid large gradients. A restrained local tint is acceptable when it improves hierarchy, but gradients must not be the primary background, card, or chart treatment.
+- Use a clear type scale with scannable headings, plain labels, readable body text, and no all-caps visual noise.
+- Use comfortable whitespace and an intentional spacing scale. Prefer fewer, well-grouped panels over dense dashboard mosaics.
+- Use Framer Motion only for useful state transitions, drawer/sidebar changes, progressive disclosure, and feedback. Respect reduced-motion preferences. Do not add looping decorative movement, particles, glowing pulses, or animated wireframes.
+- Charts use muted, distinguishable series colors, direct labels/legends, and contextual text; they must not rely on saturated glow for meaning.
+
+### Layout and interaction rules
+
+- On desktop, use a professional sidebar plus a compact top utility bar where it improves orientation. The sidebar holds primary workflow navigation; the top bar holds contextual actions, notifications, and user/account controls.
+- On smaller viewports, make navigation collapsible and prioritize one primary task at a time. Do not compress dashboard panels until labels, controls, or MRI content become unusable.
+- Use one clear primary action per workflow section. Secondary actions must be visually quieter.
+- Group related metrics and status information, but avoid an overloaded row of decorative KPI cards. Show only the decision-relevant information available for the active role.
+- Use loading, empty, unavailable, permission-denied, error, pending, and completed states as deliberate layouts, not blank or misleading placeholders.
+- Keep MRI visualization prominent on analysis screens; it receives more space than supplementary metrics or metadata.
+- Use interactive 3D brain visualization only for authorized, real result data or meaningful manipulation of it. Do not add a decorative 3D brain, floating mesh, wave, or particle effect solely to fill space.
+
+The final implementation must encode this visual system as reusable design tokens for color, spacing, radii, shadows, typography, chart colors, focus states, and animation timing. The inspected references and future Stitch output may inform component composition, but cannot override these rules.
+
+## Reference-derived layout guidance
+
+The four inspected screens establish useful information architecture without prescribing their visual treatment:
+
+- Doctor login: use a concise role-specific authentication form beside a restrained explanation of the authorized MRI workflow. A hospital selector/context belongs with doctor authentication when required; use no medical image or segmentation as a false result preview.
+- Hospital login and registration: provide a clear hospital-versus-doctor choice, a focused login form, and an obvious registration path. Avoid combining every field, benefit, and marketing message into the initial viewport.
+- Global Model Dashboard: use a predictable shell, a concise network/model status area, a focused hospital/round summary, metric visualizations, and a records area. Values appear only from actual federation, proof, or chain records.
+- Doctor Dashboard and MRI analysis: center the workspace on study selection, four-modality readiness, orientation controls, MRI slices/overlays, result provenance, and restrained supporting summaries. The three orthogonal views and a data-backed 3D view are workflow tools, not decorative panels.
 
 ## Required screens
 
@@ -113,7 +152,7 @@ The future React application should use the following boundaries:
 | Area | Intended location |
 | --- | --- |
 | Route composition and page shells | apps/web/src/app |
-| Shared visual primitives and glass layouts | apps/web/src/components/ui and apps/web/src/components/layout |
+| Shared accessible visual primitives, restrained cards, and layout shell | apps/web/src/components/ui and apps/web/src/components/layout |
 | Authentication workflows | apps/web/src/features/auth |
 | Hospital overview workflows | apps/web/src/features/dashboard |
 | Upload, viewer, and report workflows | apps/web/src/features/imaging |
@@ -139,8 +178,8 @@ React Three Fiber and Three.js should be isolated behind dedicated visualization
 Frontend implementation may begin only when all of the following are available in the task scope:
 
 1. Google Stitch design files or exported design assets.
-2. Accessible local copies of the three original sketches and the AI-generated visualization.
+2. The four reviewed reference images remain accessible locally as visual inspiration; their current untracked root paths must not be treated as application assets or staged accidentally.
 3. A decision on the approved route/authentication contract from the backend foundation.
 4. A confirmed backend contract for real MRI analysis and visualization artifacts before the segmentation viewer is connected.
 
-Until then, this document is the design record and the repository must remain free of speculative frontend implementation.
+Until then, this document is the design record and the repository must remain free of speculative frontend implementation. When Stitch designs arrive, they must be checked against the required palette, visual-comfort rules, responsive behavior, accessibility, modularity, and real-data constraints before any generated component is adopted.
