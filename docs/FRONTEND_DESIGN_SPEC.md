@@ -6,6 +6,19 @@ This document records the required V2 frontend direction. It does not authorize 
 
 At the time of writing, the reference sketches and AI-generated visualization described by the project owner are not accessible as local files in this workspace or as attached images in this conversation. They have therefore not been inspected. Before implementation begins, the supplied references must be made available as accessible local files and recorded in the implementation task.
 
+## Reference inspection record
+
+The requested reference location is docs/design-references/. It was checked during the Phase 1 design-spec review and is not present in the repository workspace. A narrow workspace scan also found no image files. Consequently, zero of the expected four images have been inspected:
+
+| Expected reference | Inspection status |
+| --- | --- |
+| Original sketch 1 | Not available locally; not inspected |
+| Original sketch 2 | Not available locally; not inspected |
+| Original sketch 3 | Not available locally; not inspected |
+| Advanced AI-generated visualization | Not available locally; not inspected |
+
+To clear this gate, add the four original source images as accessible local files beneath docs/design-references/ and identify their intended role if filenames are ambiguous. Their screen, navigation, layout, and visual decisions must then be reviewed and recorded before implementation starts.
+
 When available, visual direction is resolved in this order:
 
 1. Google Stitch design files are the primary visual reference.
