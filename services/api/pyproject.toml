@@ -8,8 +8,11 @@ version = "0.1.0"
 description = "FastAPI MRI segmentation service for ZKP-CerebraChain V2"
 requires-python = ">=3.11"
 dependencies = [
+    "alembic>=1.14",
     "fastapi>=0.138",
     "python-multipart>=0.0.20",
+    "psycopg[binary]>=3.2",
+    "SQLAlchemy>=2.0",
     "uvicorn>=0.30",
 ]
 

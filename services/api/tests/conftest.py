@@ -12,6 +12,21 @@ from cerebrachain_ml.architecture import MODALITY_ORDER
 
 
 @pytest.fixture(scope="session")
+def postgres_test_database_url() -> str:
+    """Require an explicit, dedicated PostgreSQL test database; never use SQLite."""
+
+    value = os.getenv("CEREBRACHAIN_TEST_DATABASE_URL")
+    if not value:
+        pytest.skip("CEREBRACHAIN_TEST_DATABASE_URL is not configured.")
+    if not value.startswith(("postgresql://", "postgresql+psycopg://")):
+        pytest.skip("CEREBRACHAIN_TEST_DATABASE_URL must use PostgreSQL.")
+    database_name = value.rsplit("/", maxsplit=1)[-1].split("?", maxsplit=1)[0].lower()
+    if "test" not in database_name:
+        pytest.skip("CEREBRACHAIN_TEST_DATABASE_URL must target a dedicated test database.")
+    return value
+
+
+@pytest.fixture(scope="session")
 def external_model_path() -> Path:
     """Require an explicit external checkpoint rather than embedding its path in tests."""
 

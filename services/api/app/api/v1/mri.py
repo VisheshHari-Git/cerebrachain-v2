@@ -4,8 +4,14 @@ from __future__ import annotations
 
 from fastapi import APIRouter, Depends, File, Query, UploadFile
 from fastapi.responses import FileResponse
+from sqlalchemy.orm import Session
 
-from app.api.v1.dependencies import get_mri_service
+from app.api.v1.dependencies import (
+    get_current_principal,
+    get_database_session,
+    get_mri_service,
+)
+from app.core.errors import ApiServiceError
 from app.schemas.mri import (
     MriJobResponse,
     MriSegmentationResultResponse,
@@ -13,8 +19,18 @@ from app.schemas.mri import (
     serialize_job,
 )
 from app.services.mri_segmentation import MriSegmentationService
+from app.services.authentication import Principal
+from app.services.mri_ownership import MriOwnershipService
 
 router = APIRouter(prefix="/mri", tags=["MRI Segmentation"])
+
+
+def get_mri_ownership_service(
+    session: Session = Depends(get_database_session),
+) -> MriOwnershipService:
+    """Construct the database ownership service for one authenticated request."""
+
+    return MriOwnershipService(session)
 
 
 @router.post(
@@ -29,10 +45,22 @@ def segment_mri(
     t1ce: UploadFile = File(..., description="T1CE MRI in .nii.gz format."),
     t2: UploadFile = File(..., description="T2 MRI in .nii.gz format."),
     service: MriSegmentationService = Depends(get_mri_service),
+    principal: Principal = Depends(get_current_principal),
+    ownership_service: MriOwnershipService = Depends(get_mri_ownership_service),
 ) -> MriJobResponse:
     """Serialize one CPU job and return its persisted lifecycle state."""
 
-    job = service.submit({"flair": flair, "t1": t1, "t1ce": t1ce, "t2": t2})
+    record = ownership_service.reserve(principal)
+    ownership_service.mark_running(record)
+    try:
+        job = service.submit(
+            {"flair": flair, "t1": t1, "t1ce": t1ce, "t2": t2},
+            job_id=str(record.id),
+        )
+    except ApiServiceError:
+        ownership_service.mark_failed(record)
+        raise
+    ownership_service.mark_completed(record, model_sha256=job.model_sha256)
     return serialize_job(job)
 
 
@@ -44,9 +72,12 @@ def segment_mri(
 def get_mri_job(
     job_id: str,
     service: MriSegmentationService = Depends(get_mri_service),
+    principal: Principal = Depends(get_current_principal),
+    ownership_service: MriOwnershipService = Depends(get_mri_ownership_service),
 ) -> MriJobResponse:
     """Return persisted state for a specific segmentation job."""
 
+    ownership_service.require_owned(job_id, principal)
     return serialize_job(service.get_job(job_id))
 
 
@@ -62,9 +93,12 @@ def get_mri_result(
         description="When true, stream the derived NIfTI segmentation artifact.",
     ),
     service: MriSegmentationService = Depends(get_mri_service),
+    principal: Principal = Depends(get_current_principal),
+    ownership_service: MriOwnershipService = Depends(get_mri_ownership_service),
 ) -> MriSegmentationResultResponse | FileResponse:
     """Return viewer-ready result metadata or an explicitly requested NIfTI download."""
 
+    ownership_service.require_owned(job_id, principal)
     if download:
         artifact = service.result_artifact_path(job_id)
         return FileResponse(

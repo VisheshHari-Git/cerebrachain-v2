@@ -112,13 +112,13 @@ class MriSegmentationService:
         }
         return response
 
-    def submit(self, uploads: Mapping[str, UploadFile]) -> MriJob:
+    def submit(self, uploads: Mapping[str, UploadFile], *, job_id: str | None = None) -> MriJob:
         """Store uploads, run one real inference job, and persist the derived mask."""
 
         repository = self._require_repository()
         self._require_model_configuration()
         self._validate_uploads(uploads)
-        job = MriJob.create()
+        job = MriJob.create(job_id)
 
         try:
             repository.create(job)

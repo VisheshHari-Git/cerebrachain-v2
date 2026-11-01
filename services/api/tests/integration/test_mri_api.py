@@ -1,7 +1,8 @@
-"""Endpoint-level test that performs exactly one real CPU MRI inference.
+"""Phase 2 regression test that performs exactly one real CPU MRI inference.
 
-Real HTTP coverage is executed separately against Uvicorn because the reused
-legacy environment's in-process ASGI transport can block before dispatch.
+Authenticated HTTP coverage belongs to the PostgreSQL-backed Phase 3 test path.
+This regression test verifies that the MRI service itself remains independent of
+HTTP and authentication implementation details.
 """
 
 from __future__ import annotations
@@ -11,18 +12,16 @@ from pathlib import Path
 
 import nibabel as nib
 from fastapi import UploadFile
-from fastapi.responses import FileResponse
 
-from app.api.v1.mri import get_mri_job, get_mri_result, segment_mri
 from app.core.config import Settings
 from app.services.mri_segmentation import MriSegmentationService
 
 
-def test_real_mri_segmentation_endpoint_flow(
+def test_real_mri_segmentation_service_regression(
     configured_settings: Settings,
     external_mri_paths: dict[str, Path],
 ) -> None:
-    """Exercise endpoint handlers, real inference, persistence, and result download."""
+    """Exercise real inference, protected persistence, and saved-mask dimensions."""
 
     service = MriSegmentationService(configured_settings)
     with ExitStack() as stack:
@@ -34,25 +33,24 @@ def test_real_mri_segmentation_endpoint_flow(
             )
             for modality, path in external_mri_paths.items()
         }
-        submitted = segment_mri(service=service, **uploads)
+        submitted = service.submit(uploads)
 
-    assert submitted.status == "completed"
-    job_status = get_mri_job(submitted.job_id, service=service)
-    assert job_status.status == "completed"
+    assert submitted.status.value == "completed"
+    job_status = service.get_job(submitted.job_id)
+    assert job_status.status.value == "completed"
 
-    result = get_mri_result(submitted.job_id, service=service)
-    assert result.status == "completed"
-    assert result.input_shape[0:2] == [1, 4]
+    result = service.get_completed_result(submitted.job_id)
+    assert result.status.value == "completed"
+    assert result.input_shape is not None
+    assert result.segmentation_shape is not None
+    assert result.statistics is not None
+    assert result.input_shape[0:2] == (1, 4)
     assert result.segmentation_shape == result.input_shape[2:]
     assert result.statistics.tumor_voxels >= 0
     assert result.statistics.tumor_volume_ml >= 0
-    assert result.artifact_download_url.endswith("?download=true")
 
     artifact_path = configured_settings.result_storage_dir / submitted.job_id / "segmentation.nii.gz"
     assert artifact_path.is_file()
     saved_mask = nib.load(str(artifact_path))
-    assert tuple(saved_mask.shape) == tuple(result.segmentation_shape)
-
-    download = get_mri_result(submitted.job_id, download=True, service=service)
-    assert isinstance(download, FileResponse)
-    assert download.media_type == "application/gzip"
+    assert tuple(saved_mask.shape) == result.segmentation_shape
+    assert service.result_artifact_path(submitted.job_id) == artifact_path

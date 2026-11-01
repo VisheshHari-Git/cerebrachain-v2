@@ -18,6 +18,8 @@ Validation errors will retain field-level details. Error responses must not disc
 
 ## Authentication and identity
 
+Phase 3 implements the public registration/login/me contract and hospital administration endpoints documented in [AUTH_API.md](AUTH_API.md). The earlier proposed separate hospital/doctor login paths are intentionally consolidated into `POST /auth/login` with an explicit `hospital_slug`; its response reveals only a verified active membership. Refresh tokens and server-side revocation remain deferred rather than simulated.
+
 | Method and path | Purpose | Initial authorization |
 | --- | --- | --- |
 | POST /auth/hospitals/register | Begin hospital registration workflow | Public, rate limited; not an automatic approval |

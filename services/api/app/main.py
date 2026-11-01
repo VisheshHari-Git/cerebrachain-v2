@@ -14,6 +14,7 @@ from app.api.v1.router import router as api_v1_router
 from app.core.config import Settings
 from app.core.errors import ApiServiceError
 from app.core.logging import configure_logging
+from app.db.session import Database
 from app.schemas.common import ErrorDetail, ErrorResponse
 from app.services.mri_segmentation import MriSegmentationService
 
@@ -82,6 +83,11 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         ),
     )
     app.state.settings = resolved_settings
+    app.state.database = (
+        Database(resolved_settings.database_url)
+        if resolved_settings.database_is_configured and resolved_settings.database_url is not None
+        else None
+    )
     app.state.mri_service = MriSegmentationService(resolved_settings)
 
     @app.middleware("http")

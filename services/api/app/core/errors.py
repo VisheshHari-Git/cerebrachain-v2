@@ -16,8 +16,13 @@ class ApiServiceError(Exception):
 class ConfigurationUnavailableError(ApiServiceError):
     """Required protected runtime configuration is missing or invalid."""
 
-    def __init__(self, message: str = "MRI inference is not configured.") -> None:
-        super().__init__(503, "mri_service_unavailable", message)
+    def __init__(
+        self,
+        message: str = "MRI inference is not configured.",
+        *,
+        code: str = "mri_service_unavailable",
+    ) -> None:
+        super().__init__(503, code, message)
 
 
 class MriInputError(ApiServiceError):
@@ -53,3 +58,31 @@ class MriInferenceFailedError(ApiServiceError):
 
     def __init__(self) -> None:
         super().__init__(500, "mri_inference_failed", "MRI segmentation did not complete.")
+
+
+class AuthenticationRequiredError(ApiServiceError):
+    """The caller did not provide a valid, unexpired authentication credential."""
+
+    def __init__(self, message: str = "Authentication is required.") -> None:
+        super().__init__(401, "authentication_required", message)
+
+
+class AuthorizationDeniedError(ApiServiceError):
+    """The authenticated caller is not permitted to perform an operation."""
+
+    def __init__(self, message: str = "You are not authorized to perform this action.") -> None:
+        super().__init__(403, "authorization_denied", message)
+
+
+class ResourceNotFoundError(ApiServiceError):
+    """A resource is unknown or outside the caller's hospital scope."""
+
+    def __init__(self, message: str = "The requested resource was not found.") -> None:
+        super().__init__(404, "resource_not_found", message)
+
+
+class ConflictError(ApiServiceError):
+    """An operation conflicts with an existing server-side record."""
+
+    def __init__(self, message: str) -> None:
+        super().__init__(409, "conflict", message)

@@ -6,7 +6,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum
 from typing import Any
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 from cerebrachain_ml.statistics import TumorStatistics
 
@@ -46,12 +46,14 @@ class MriJob:
     error_message: str | None = None
 
     @classmethod
-    def create(cls) -> "MriJob":
+    def create(cls, job_id: str | None = None) -> "MriJob":
         """Create a new non-identifying queued job."""
 
         now = utc_now()
+        if job_id is not None:
+            job_id = str(UUID(job_id))
         return cls(
-            job_id=str(uuid4()),
+            job_id=job_id or str(uuid4()),
             status=MriJobStatus.QUEUED,
             created_at=now,
             updated_at=now,

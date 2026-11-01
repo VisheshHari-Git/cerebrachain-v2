@@ -12,6 +12,13 @@ def _optional_path(name: str) -> Path | None:
     return Path(raw_value).expanduser() if raw_value else None
 
 
+def _optional_value(name: str) -> str | None:
+    """Read an optional environment value without supplying an insecure default."""
+
+    value = os.getenv(name, "").strip()
+    return value or None
+
+
 def _positive_int(name: str, default: int, *, allow_zero: bool = False) -> int:
     raw_value = os.getenv(name, "").strip()
     if not raw_value:
@@ -42,7 +49,7 @@ def _unit_interval_float(name: str, default: float) -> float:
 
 @dataclass(frozen=True)
 class Settings:
-    """Runtime settings that never embed local model or storage paths in source code."""
+    """Runtime settings that never embed protected paths or secrets in source code."""
 
     model_checkpoint_path: Path | None
     model_sha256: str | None
@@ -51,6 +58,10 @@ class Settings:
     max_upload_bytes: int = 64 * 1024 * 1024
     cpu_threads: int = 0
     sliding_window_overlap: float = 0.5
+    database_url: str | None = None
+    jwt_secret: str | None = None
+    jwt_issuer: str = "zkp-cerebrachain-v2"
+    access_token_ttl_seconds: int = 900
 
     @classmethod
     def from_environment(cls) -> "Settings":
@@ -74,6 +85,15 @@ class Settings:
                 "CEREBRACHAIN_SLIDING_WINDOW_OVERLAP",
                 0.5,
             ),
+            database_url=_optional_value("CEREBRACHAIN_DATABASE_URL"),
+            jwt_secret=_optional_value("CEREBRACHAIN_JWT_SECRET"),
+            jwt_issuer=os.getenv(
+                "CEREBRACHAIN_JWT_ISSUER", "zkp-cerebrachain-v2"
+            ).strip(),
+            access_token_ttl_seconds=_positive_int(
+                "CEREBRACHAIN_ACCESS_TOKEN_TTL_SECONDS",
+                900,
+            ),
         )
 
     @property
@@ -87,3 +107,20 @@ class Settings:
         """Return whether a protected result-storage root is configured."""
 
         return self.result_storage_dir is not None
+
+    @property
+    def database_is_configured(self) -> bool:
+        """Return whether a database connection URL was provided."""
+
+        return self.database_url is not None
+
+    @property
+    def authentication_is_configured(self) -> bool:
+        """Return whether database and a non-default JWT signing secret are available."""
+
+        return (
+            self.database_is_configured
+            and self.jwt_secret is not None
+            and len(self.jwt_secret) >= 32
+            and bool(self.jwt_issuer)
+        )
