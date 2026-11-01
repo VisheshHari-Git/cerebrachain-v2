@@ -1,3 +1,4 @@
+import { FederationDashboardPage } from "../pages/FederationDashboardPage";
 import { Route, Routes } from "react-router-dom";
 import { AppShell } from "../layouts/AppShell";
 import { DoctorDashboardPage } from "../pages/DoctorDashboardPage";
@@ -29,6 +30,7 @@ export function App() {
           <Route element={<MriResultPage />} path="results/:jobId" />
           <Route element={<ProtectedRoute allowedRoles={["hospital_admin"]} />}>
             <Route element={<HospitalDashboardPage />} path="hospital" />
+            <Route element={<FederationDashboardPage />} path="federation" />
             <Route element={<HospitalDashboardPage />} path="doctors" />
           </Route>
           <Route element={<ProtectedRoute allowedRoles={["doctor"]} />}>

@@ -1,6 +1,7 @@
 import {
   FileChartColumnIncreasing,
   Hospital,
+  Network,
   LayoutDashboard,
   LogOut,
   Menu,
@@ -35,6 +36,7 @@ export function AppShell() {
       ? [
           { icon: Users, label: "Doctors", to: "/app/doctors" },
           { icon: Hospital, label: "Hospital", to: "/app/hospital" },
+          { icon: Network, label: "Global model", to: "/app/federation" },
         ]
       : []),
   ];
