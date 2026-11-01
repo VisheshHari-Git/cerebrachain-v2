@@ -1,3 +1,4 @@
+import { MriSliceViewer } from "../components/imaging/MriSliceViewer";
 import { Download, Search } from "lucide-react";
 import { useState } from "react";
 import { useParams } from "react-router-dom";
@@ -84,6 +85,9 @@ export function MriResultPage() {
         />
       ) : (
         <div className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+          <div className="xl:col-span-2">
+            <MriSliceViewer jobId={resultState.data.job_id} />
+          </div>
           <Card>
             <div className="flex items-start justify-between gap-4">
               <div>
@@ -91,7 +95,7 @@ export function MriResultPage() {
                   Verified result metadata
                 </h2>
                 <p className="mt-1 text-sm text-muted">
-                  No image preview is rendered in Phase 4.
+                  Explore authorized MRI images and real segmentation results above.
                 </p>
               </div>
               <StatusBadge status={resultState.data.status} />

@@ -2,6 +2,14 @@
 
 from __future__ import annotations
 
+from typing import Literal
+
+from fastapi import HTTPException
+from fastapi.responses import Response
+
+from app.services.mri_viewer import render_mri_slice
+
+
 from fastapi import APIRouter, Depends, File, Query, UploadFile
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
@@ -130,4 +138,53 @@ def get_mri_result(
         ),
         inference_seconds=job.inference_seconds,
         artifact_download_url=f"/api/v1/mri/jobs/{job.job_id}/result?download=true",
+    )
+
+
+@router.get(
+    "/jobs/{job_id}/slice",
+    summary="Render an authorized real MRI slice with optional segmentation",
+)
+def get_mri_slice(
+    job_id: str,
+    modality: Literal["flair", "t1", "t1ce", "t2"] = Query("flair"),
+    plane: Literal["axial", "sagittal", "coronal"] = Query("axial"),
+    position: float = Query(0.5, ge=0.0, le=1.0),
+    overlay: bool = Query(True),
+    service: MriSegmentationService = Depends(get_mri_service),
+    principal: Principal = Depends(get_current_principal),
+    ownership_service: MriOwnershipService = Depends(
+        get_mri_ownership_service
+    ),
+) -> Response:
+    """Provide a protected PNG preview without exposing filesystem paths."""
+
+    # IMPORTANT: Verify hospital ownership before accessing MRI files.
+    ownership_service.require_owned(job_id, principal)
+
+    modality_paths, segmentation_path = (
+        service.viewer_artifact_paths(job_id)
+    )
+
+    try:
+        png = render_mri_slice(
+            modality_paths[modality],
+            segmentation_path,
+            plane=plane,
+            position=position,
+            overlay=overlay,
+        )
+    except (OSError, ValueError) as exc:
+        raise HTTPException(
+            status_code=422,
+            detail="MRI preview unavailable or geometry invalid.",
+        ) from exc
+
+    return Response(
+        content=png,
+        media_type="image/png",
+        headers={
+            "Cache-Control": "private, no-store",
+            "X-Content-Type-Options": "nosniff",
+        },
     )

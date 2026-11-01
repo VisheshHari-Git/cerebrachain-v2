@@ -212,6 +212,22 @@ class MriSegmentationService:
             raise MriResultUnavailableError()
         return job
 
+
+    def viewer_artifact_paths(
+        self,
+        job_id: str,
+    ) -> tuple[dict[str, Path], Path]:
+        """Return stored MRI paths for an authorized completed job.
+
+        Caller must enforce hospital ownership before invoking this.
+        """
+        self.get_completed_result(job_id)
+        repository = self._require_repository()
+        return (
+            repository.modality_paths(job_id),
+            repository.segmentation_path(job_id),
+        )
+
     def result_artifact_path(self, job_id: str) -> Path:
         """Return an authorized completed result artifact path for response streaming."""
 
