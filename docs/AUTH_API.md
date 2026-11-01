@@ -101,7 +101,7 @@ Returns `{ "cases": [{ "id", "case_reference", "created_at" }] }` scoped by the 
 
 `POST /mri/segment`, `GET /mri/jobs/{job_id}`, and `GET /mri/jobs/{job_id}/result` now require a bearer token. Before an upload is persisted, the API creates a PostgreSQL `mri_jobs` ownership record using the authenticated user and hospital. Status/result/download reads first constrain that record by the active hospital; cross-hospital job IDs return `404` without exposing their existence.
 
-The existing four upload fields and result JSON remain unchanged. The ML model, checkpoint verification, preprocessing, inference, and segmentation postprocessing are not modified by Phase 3.
+The multipart fields are `flair`, `t1`, `t1ce`, and `t2`; each accepts a NIfTI `.nii` or `.nii.gz` file within the configured size limit. The ML model, checkpoint verification, preprocessing, inference, and segmentation postprocessing are not modified by Phase 3 or Phase 4.
 
 ## Safe local demo procedure
 

@@ -77,6 +77,7 @@ class FileSystemMriJobRepository:
         modality: str,
         source: BinaryIO,
         *,
+        extension: str,
         max_bytes: int,
     ) -> Path:
         """Write one upload under a generated name with a strict byte limit."""
@@ -84,7 +85,9 @@ class FileSystemMriJobRepository:
         if modality not in MODALITY_ORDER:
             raise MriUploadError("Unexpected MRI modality.")
 
-        destination = self._job_directory(job_id) / "uploads" / f"{modality}.nii.gz"
+        if extension not in {".nii", ".nii.gz"}:
+            raise MriUploadError("Unsupported MRI file extension.")
+        destination = self._job_directory(job_id) / "uploads" / f"{modality}{extension}"
         bytes_written = 0
         try:
             with destination.open("xb") as target:
@@ -109,7 +112,17 @@ class FileSystemMriJobRepository:
         """Return generated upload paths in the established modality namespace."""
 
         directory = self._job_directory(job_id) / "uploads"
-        return {modality: directory / f"{modality}.nii.gz" for modality in MODALITY_ORDER}
+        paths: dict[str, Path] = {}
+        for modality in MODALITY_ORDER:
+            candidates = [directory / f"{modality}.nii.gz", directory / f"{modality}.nii"]
+            path = next(
+                (candidate for candidate in candidates if candidate.is_file() and not candidate.is_symlink()),
+                None,
+            )
+            if path is None:
+                raise MriJobRepositoryError("MRI upload is unavailable.")
+            paths[modality] = path
+        return paths
 
     def segmentation_path(self, job_id: str) -> Path:
         """Return the generated output location for a job's derived segmentation."""

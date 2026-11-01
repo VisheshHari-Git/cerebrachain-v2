@@ -2,7 +2,7 @@
 
 ZKP-CerebraChain V2 is a research-oriented federated, zero-knowledge multi-modal MRI segmentation platform. It is being rebuilt as a maintainable full-stack system for hospital-scoped workflows, real MONAI 3D U-Net inference, federated model monitoring, and verifiable model-update provenance.
 
-> Status: Phase 1 architecture preparation is complete. No frontend, API service, database, model inference endpoint, federated round, smart-contract deployment, or ZK proof flow is implemented in V2 yet.
+> Status: Phases 1–4 are complete. V2 has a FastAPI MRI API, PostgreSQL-backed hospital authentication and tenancy, and a React frontend for the authenticated MRI workflow. Federation, ZK verification, blockchain, IPFS, and MRI visualization are deliberately deferred.
 
 ## What V2 will support
 
@@ -14,20 +14,19 @@ ZKP-CerebraChain V2 is a research-oriented federated, zero-knowledge multi-modal
 
 Clinical deployment is out of scope. Any future result must remain labelled research-only until the required clinical, security, privacy, and regulatory validation is complete.
 
-## Phase 1 outcomes
+## Implemented phases
 
-- Inspected the legacy project in read-only mode and recorded reusable components in docs/ASSET_INVENTORY.md.
-- Verified the externally stored, legacy-trained MONAI 3D U-Net checkpoint by SHA-256 and strict state-dictionary loading.
-- Recorded its architecture, modality order, preprocessing, postprocessing, and existing research-only evaluation metadata.
-- Created a dependency-free monorepo structure prepared for a Vite/React web app, FastAPI API, SQLAlchemy/PostgreSQL, Flower adapters, and trust-layer adapters.
-- Added permanent engineering, security, architecture, and Git rules in AGENTS.md.
+- **Phase 1:** inspected legacy assets read-only, recorded the verified checkpoint, and established project boundaries and engineering rules.
+- **Phase 2:** implemented the FastAPI MRI service, verified strict MONAI 3D U-Net loading, preserved the source modality order, and exposed protected segmentation artifact download.
+- **Phase 3:** added PostgreSQL/Alembic identity and ownership records, hospital and doctor authentication, JWT validation, role checks, and hospital-level data isolation.
+- **Phase 4:** added the React/Vite/Tailwind application with role-aware routes, in-memory bearer-token sessions, hospital and doctor dashboards, four-modality NIfTI upload, real result metadata, and authorized segmentation download.
 
 ## Repository layout
 
     apps/
-      web/                  Future React + TypeScript + Vite application
+      web/                  React + TypeScript + Vite application
     services/
-      api/                  Future FastAPI application and Alembic migrations
+      api/                  FastAPI application and Alembic migrations
     packages/
       ml-adapter/           Validated model-loading and inference boundary
       federation-adapter/   Flower integration boundary
@@ -59,15 +58,30 @@ See docs/ASSET_INVENTORY.md for the exact read-only source path, provenance cave
 - docs/ASSET_INVENTORY.md — legacy asset inventory and compatibility findings.
 - docs/API_PLAN.md — proposed versioned API surface and error contract.
 - docs/DEVELOPMENT_ROADMAP.md — phased delivery plan and quality gates.
+- docs/AUTH_API.md — implemented authentication and hospital-isolation API contract.
+- docs/FRONTEND_DESIGN_SPEC.md — approved Healthcare SaaS visual direction.
+- docs/FRONTEND_IMPLEMENTATION.md — frontend routes, API integration, and browser-security boundaries.
 
-## Current constraints
+## Current constraints and safety
 
-- Dependencies have not been installed.
-- Services have not been started.
 - No model was trained, copied, converted, or changed.
 - No simulated predictions, federated rounds, proofs, transactions, or CIDs were created.
-- All future runtime configuration must use environment variables and external protected storage.
+- The frontend stores access tokens in memory only. It does not write them to local or session storage.
+- Protected API and PostgreSQL configuration must remain environment-provided. MRI inputs and derived masks remain in protected storage outside Git.
+- MRI analysis is research-only and must not be described as a clinical diagnosis.
+
+## Local frontend development
+
+Copy `apps/web/.env.example` to an uncommitted `.env` file if a non-default API proxy target is required, then run:
+
+```bash
+cd apps/web
+npm install
+npm run dev
+```
+
+The API must be started separately with its own protected environment configuration and PostgreSQL database. See `services/api/.env.example` and `docs/AUTH_API.md`; do not place credentials, model paths, or MRI artifacts in the frontend environment file.
 
 ## Next phase
 
-Phase 2 should establish the Vite and FastAPI foundations, configuration, PostgreSQL/Alembic tenancy model, secure authentication boundaries, baseline tests, linting, and CI checks. It must not yet train a model or claim any new ML, Flower, ZK, or chain result.
+Phase 5 can add guarded axial, sagittal, coronal, and 3D result visualization from real authorized artifacts. It must not invent MRI imagery or measurements, and it must preserve the API tenancy boundary.

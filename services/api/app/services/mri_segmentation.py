@@ -117,7 +117,7 @@ class MriSegmentationService:
 
         repository = self._require_repository()
         self._require_model_configuration()
-        self._validate_uploads(uploads)
+        extensions = self._validate_uploads(uploads)
         job = MriJob.create(job_id)
 
         try:
@@ -128,6 +128,7 @@ class MriSegmentationService:
                     job.job_id,
                     modality,
                     upload.file,
+                    extension=extensions[modality],
                     max_bytes=self._settings.max_upload_bytes,
                 )
 
@@ -244,13 +245,20 @@ class MriSegmentationService:
         return self._repository
 
     @staticmethod
-    def _validate_uploads(uploads: Mapping[str, UploadFile]) -> None:
+    def _validate_uploads(uploads: Mapping[str, UploadFile]) -> dict[str, str]:
         if set(uploads) != set(MODALITY_ORDER):
             raise MriInputError("Exactly FLAIR, T1, T1CE, and T2 MRI files are required.")
+        extensions: dict[str, str] = {}
         for modality in MODALITY_ORDER:
             filename = uploads[modality].filename or ""
-            if not filename.lower().endswith(".nii.gz"):
-                raise MriInputError(f"{modality.upper()} must be a .nii.gz MRI file.")
+            normalized_filename = filename.lower()
+            if normalized_filename.endswith(".nii.gz"):
+                extensions[modality] = ".nii.gz"
+            elif normalized_filename.endswith(".nii"):
+                extensions[modality] = ".nii"
+            else:
+                raise MriInputError(f"{modality.upper()} must be a .nii or .nii.gz MRI file.")
+        return extensions
 
     def _mark_failed(self, job: MriJob, code: str, message: str) -> None:
         """Persist a safe failure state without masking the original service error."""

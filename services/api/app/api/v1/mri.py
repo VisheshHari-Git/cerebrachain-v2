@@ -40,10 +40,10 @@ def get_mri_ownership_service(
     summary="Upload four MRI modalities and run real 3D segmentation",
 )
 def segment_mri(
-    flair: UploadFile = File(..., description="FLAIR MRI in .nii.gz format."),
-    t1: UploadFile = File(..., description="T1 MRI in .nii.gz format."),
-    t1ce: UploadFile = File(..., description="T1CE MRI in .nii.gz format."),
-    t2: UploadFile = File(..., description="T2 MRI in .nii.gz format."),
+    flair: UploadFile = File(..., description="FLAIR MRI in .nii or .nii.gz format."),
+    t1: UploadFile = File(..., description="T1 MRI in .nii or .nii.gz format."),
+    t1ce: UploadFile = File(..., description="T1CE MRI in .nii or .nii.gz format."),
+    t2: UploadFile = File(..., description="T2 MRI in .nii or .nii.gz format."),
     service: MriSegmentationService = Depends(get_mri_service),
     principal: Principal = Depends(get_current_principal),
     ownership_service: MriOwnershipService = Depends(get_mri_ownership_service),
