@@ -1,0 +1,49 @@
+# Python
+.venv/
+venv/
+__pycache__/
+*.pyc
+
+# Frontend
+node_modules/
+dist/
+.next/
+
+# Environment and credentials
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+
+# MRI datasets
+*.nii
+*.nii.gz
+*.dcm
+*.tar
+*.zip
+
+# Trained ML models
+*.pth
+*.pt
+*.ckpt
+*.safetensors
+
+# Generated medical data
+uploads/
+outputs/
+reports/generated/
+checkpoints/
+
+# Databases
+*.db
+*.sqlite3
+
+# Blockchain secrets
+*.zkey
+wallets/
+keystore/
+
+# Logs
+*.log
