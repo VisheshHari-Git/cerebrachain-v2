@@ -1,3 +1,4 @@
+import { BlockchainTrustPage } from "../pages/BlockchainTrustPage";
 import { FederationDashboardPage } from "../pages/FederationDashboardPage";
 import { Route, Routes } from "react-router-dom";
 import { AppShell } from "../layouts/AppShell";
@@ -31,6 +32,7 @@ export function App() {
           <Route element={<ProtectedRoute allowedRoles={["hospital_admin"]} />}>
             <Route element={<HospitalDashboardPage />} path="hospital" />
             <Route element={<FederationDashboardPage />} path="federation" />
+            <Route element={<BlockchainTrustPage />} path="blockchain" />
             <Route element={<HospitalDashboardPage />} path="doctors" />
           </Route>
           <Route element={<ProtectedRoute allowedRoles={["doctor"]} />}>

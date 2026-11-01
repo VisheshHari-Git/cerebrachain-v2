@@ -2,6 +2,7 @@ import {
   FileChartColumnIncreasing,
   Hospital,
   Network,
+  ShieldCheck,
   LayoutDashboard,
   LogOut,
   Menu,
@@ -37,6 +38,7 @@ export function AppShell() {
           { icon: Users, label: "Doctors", to: "/app/doctors" },
           { icon: Hospital, label: "Hospital", to: "/app/hospital" },
           { icon: Network, label: "Global model", to: "/app/federation" },
+          { icon: ShieldCheck, label: "Blockchain trust", to: "/app/blockchain" },
         ]
       : []),
   ];
